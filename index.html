@@ -703,23 +703,7 @@ function generatePDF(){
   printWin.document.write('.htext h1{color:#6d1fa0;font-size:1.5rem;margin:0 0 2px;}.htext p{color:#888;font-size:0.8rem;margin:0;}');
   printWin.document.write('footer{margin-top:40px;padding-top:12px;border-top:1px solid #e4e4e7;font-size:0.75rem;color:#888;text-align:center;}');
   printWin.document.write('@media print{body{padding:20px;}.no-print{display:none;}}');
-  printWin.document.write('</style><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyOLZrb0w4qgMVmPwnv_160p01aMmtDy09s",
-    authDomain: "guiaa-ce4cf.firebaseapp.com",
-    projectId: "guiaa-ce4cf",
-    storageBucket: "guiaa-ce4cf.firebasestorage.app",
-    messagingSenderId: "294325478459",
-    appId: "1:294325478459:web:18b4f01d81defa80n2681a",
-    measurementId: "G-ZX4HT9dS2X"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const googleProvider = new firebase.auth.GoogleAuthProvider();
-</script>
-</head><body>');
+  printWin.document.write('<\/style>\n<\/head><body>');
   printWin.document.write('<header>');
   printWin.document.write('<div class="htext"><h1>Guia de Treinamento &mdash; '+currentTrainingAI+'</h1><p>Gerado pelo GuIAa &middot; guiaa.netlify.app</p></div>');
   printWin.document.write('</header>');
