@@ -472,14 +472,10 @@ const videoLinks={
 };
 
 function loginWithGoogle(){
-  auth.signInWithPopup(googleProvider)
-    .then(function(result){
-      var user=result.user;
-      loginWithName(user.displayName, user.email, user.photoURL);
-    })
+  auth.signInWithRedirect(googleProvider)
     .catch(function(error){
-      console.error('Login error:', error);
-      showToast('Erro ao fazer login. Tente novamente.');
+      console.error('Login redirect error:', error.code, error.message);
+      showToast('Erro: '+error.code);
     });
 }
 
@@ -905,12 +901,31 @@ function removeCard(name){
 
 function showToast(msg){const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
+// Handle redirect result first (mobile Google login)
+auth.getRedirectResult().then(function(result){
+  if(result&&result.user){
+    var user=result.user;
+    loginWithName(user.displayName||user.email, user.email, user.photoURL);
+  }
+}).catch(function(error){
+  console.error('Redirect error:', error);
+});
+
+// Handle redirect result first
+auth.getRedirectResult().then(function(result){
+  if(result && result.user){
+    var user=result.user;
+    loginWithName(user.displayName||user.email, user.email, user.photoURL);
+  }
+}).catch(function(error){
+  console.error('Redirect error:', error.code, error.message);
+});
+
 // Auto-restore session via Firebase Auth
 auth.onAuthStateChanged(function(user){
   if(user){
     loginWithName(user.displayName||user.email, user.email, user.photoURL);
   } else {
-    // Check localStorage fallback for email/password accounts
     var saved=localStorage.getItem('guiaa_user');
     if(saved){
       try{
