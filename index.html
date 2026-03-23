@@ -174,6 +174,22 @@ footer{text-align:center;padding:2rem;font-size:0.8rem;color:var(--g400);border-
 footer span{color:var(--p400);}
 @media(max-width:768px){nav{padding:1rem 1.5rem;}.grid-section{padding:1.5rem 1rem 3rem;}.cards-grid{grid-template-columns:repeat(auto-fill,160px)}.card,.card-add{width:160px;height:160px;}}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyOLZrb0w4qgMVmPwnv_160p01aMmtDy09s",
+    authDomain: "guiaa-ce4cf.firebaseapp.com",
+    projectId: "guiaa-ce4cf",
+    storageBucket: "guiaa-ce4cf.firebasestorage.app",
+    messagingSenderId: "294325478459",
+    appId: "1:294325478459:web:18b4f01d81defa80n2681a",
+    measurementId: "G-ZX4HT9dS2X"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+</script>
 </head>
 <body>
 
@@ -432,7 +448,15 @@ const videoLinks={
 };
 
 function loginWithGoogle(){
-  loginWithName('Pedro Henrique','pedro@gmail.com');
+  auth.signInWithPopup(googleProvider)
+    .then(function(result){
+      var user=result.user;
+      loginWithName(user.displayName, user.email, user.photoURL);
+    })
+    .catch(function(error){
+      console.error('Login error:', error);
+      showToast('Erro ao fazer login. Tente novamente.');
+    });
 }
 
 function skipLogin(){
@@ -479,33 +503,39 @@ function criarConta(){
   err.classList.remove('show');
 }
 
-function loginWithName(name,email){
-  currentUser={name:name,email:email};
-  localStorage.setItem('guiaa_user',JSON.stringify({name:name,email:email}));
+function loginWithName(name,email,photo){
+  currentUser={name:name,email:email,photo:photo||''};
+  localStorage.setItem('guiaa_user',JSON.stringify({name:name,email:email,photo:photo||''}));
   document.getElementById('loginScreen').classList.add('hidden');
   var loginBtn=document.getElementById('navLoginBtn');
   if(loginBtn) loginBtn.style.display='none';
   var nav=document.getElementById('navUser');
   if(nav) nav.style.display='flex';
-  var initials=name.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
-  document.getElementById('navAvatar').textContent=initials;
+  var avatarEl=document.getElementById('navAvatar');
+  if(photo){
+    avatarEl.innerHTML='<img src="'+photo+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+  } else {
+    var initials=name.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
+    avatarEl.textContent=initials;
+  }
   document.getElementById('navName').textContent=name.split(' ')[0];
   showToast('Bem-vindo, '+name.split(' ')[0]+'! &#10022;');
   savedAIs.forEach(function(ai){addCardToGrid(ai,true);});
 }
 
 function logout(){
-  currentUser=null;
-  localStorage.removeItem('guiaa_user');
-  var loginBtn=document.getElementById('navLoginBtn');
-  if(loginBtn) loginBtn.style.display='flex';
-  var nav=document.getElementById('navUser');
-  if(nav) nav.style.display='none';
-  // Remove user-added cards from grid
-  document.querySelectorAll('.card-user-added').forEach(function(c){c.remove();});
-  document.getElementById('loginScreen').classList.remove('hidden');
-  switchLoginTab('entrar');
-  showToast('Ate logo!');
+  auth.signOut().then(function(){
+    currentUser=null;
+    localStorage.removeItem('guiaa_user');
+    var loginBtn=document.getElementById('navLoginBtn');
+    if(loginBtn) loginBtn.style.display='flex';
+    var nav=document.getElementById('navUser');
+    if(nav) nav.style.display='none';
+    document.querySelectorAll('.card-user-added').forEach(function(c){c.remove();});
+    document.getElementById('loginScreen').classList.remove('hidden');
+    switchLoginTab('entrar');
+    showToast('Ate logo!');
+  });
 }
 
 function filterCards(tag,btn){
@@ -649,7 +679,23 @@ function generatePDF(){
   printWin.document.write('.htext h1{color:#6d1fa0;font-size:1.5rem;margin:0 0 2px;}.htext p{color:#888;font-size:0.8rem;margin:0;}');
   printWin.document.write('footer{margin-top:40px;padding-top:12px;border-top:1px solid #e4e4e7;font-size:0.75rem;color:#888;text-align:center;}');
   printWin.document.write('@media print{body{padding:20px;}.no-print{display:none;}}');
-  printWin.document.write('</style></head><body>');
+  printWin.document.write('</style><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyOLZrb0w4qgMVmPwnv_160p01aMmtDy09s",
+    authDomain: "guiaa-ce4cf.firebaseapp.com",
+    projectId: "guiaa-ce4cf",
+    storageBucket: "guiaa-ce4cf.firebasestorage.app",
+    messagingSenderId: "294325478459",
+    appId: "1:294325478459:web:18b4f01d81defa80n2681a",
+    measurementId: "G-ZX4HT9dS2X"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+</script>
+</head><body>');
   printWin.document.write('<header>');
   printWin.document.write('<div class="htext"><h1>Guia de Treinamento &mdash; '+currentTrainingAI+'</h1><p>Gerado pelo GuIAa &middot; guiaa.netlify.app</p></div>');
   printWin.document.write('</header>');
@@ -851,27 +897,21 @@ function removeCard(name){
 
 function showToast(msg){const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
-// Auto-restore session on page load
-(function(){
-  var saved=localStorage.getItem('guiaa_user');
-  if(saved){
-    try{
-      var u=JSON.parse(saved);
-      if(u&&u.name){
-        currentUser=u;
-        document.getElementById('loginScreen').classList.add('hidden');
-        var loginBtn=document.getElementById('navLoginBtn');
-        if(loginBtn) loginBtn.style.display='none';
-        var nav=document.getElementById('navUser');
-        if(nav) nav.style.display='flex';
-        var initials=u.name.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
-        document.getElementById('navAvatar').textContent=initials;
-        document.getElementById('navName').textContent=u.name.split(' ')[0];
-        savedAIs.forEach(function(ai){addCardToGrid(ai,true);});
-      }
-    }catch(e){}
+// Auto-restore session via Firebase Auth
+auth.onAuthStateChanged(function(user){
+  if(user){
+    loginWithName(user.displayName||user.email, user.email, user.photoURL);
+  } else {
+    // Check localStorage fallback for email/password accounts
+    var saved=localStorage.getItem('guiaa_user');
+    if(saved){
+      try{
+        var u=JSON.parse(saved);
+        if(u&&u.name) loginWithName(u.name,u.email,u.photo||'');
+      }catch(e){}
+    }
   }
-})();
+});
 
 document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
 document.getElementById('trainOverlay').addEventListener('click',function(e){if(e.target===this)closeTraining();});
