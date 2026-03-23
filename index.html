@@ -474,10 +474,20 @@ const videoLinks={
 };
 
 function loginWithGoogle(){
-  auth.signInWithRedirect(googleProvider)
+  auth.signInWithPopup(googleProvider)
+    .then(function(result){
+      var user=result.user;
+      loginWithName(user.displayName||user.email, user.email, user.photoURL);
+    })
     .catch(function(error){
-      console.error('Login redirect error:', error.code, error.message);
-      showToast('Erro: '+error.code);
+      console.error('Login error:', error.code, error.message);
+      if(error.code==='auth/popup-blocked'){
+        showToast('Popup bloqueado! Permita popups para este site.');
+      } else if(error.code==='auth/cancelled-popup-request'){
+        // ignore
+      } else {
+        showToast('Erro ao fazer login: '+error.code);
+      }
     });
 }
 
@@ -911,16 +921,6 @@ auth.getRedirectResult().then(function(result){
   }
 }).catch(function(error){
   console.error('Redirect error:', error);
-});
-
-// Handle redirect result first
-auth.getRedirectResult().then(function(result){
-  if(result && result.user){
-    var user=result.user;
-    loginWithName(user.displayName||user.email, user.email, user.photoURL);
-  }
-}).catch(function(error){
-  console.error('Redirect error:', error.code, error.message);
 });
 
 // Auto-restore session via Firebase Auth
